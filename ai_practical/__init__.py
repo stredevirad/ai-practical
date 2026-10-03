@@ -366,32 +366,33 @@ chatbot()
 
 def hangman(words=None, max_wrong=6):
     """
-    Play a general-purpose Hangman game.
+   import random
 
-    Parameters
-    ----------
-    words : list, optional
-        List of possible words.
+word = random.choice(["python", "computer", "science"])
+guessed = ""
+chance = 6
 
-    max_wrong : int
-        Maximum number of wrong guesses allowed.
+while chance > 0:
 
-    Examples
-    --------
-        hangman()
+    for letter in word:
+        print(letter if letter in guessed else "_", end=" ")
 
-    Custom words:
+    print()
 
-        hangman(["python", "computer", "algorithm"])
+    if all(letter in guessed for letter in word):
+        print("You WIN!")
+        break
 
-    More chances:
+    x = input("Enter a letter: ").lower()
 
-        hangman(["python", "science"], max_wrong=8)
+    if x in word:
+        guessed += x
+    else:
+        chance -= 1
+        print("Wrong! Chances left:", chance)
 
-    Returns
-    -------
-    str or None
-        The secret word if the game ends normally.
+else:
+    print("You LOST! Word:", word)
     """
 
     if words is None:
@@ -595,43 +596,30 @@ def _weighted_neighbors(graph, node):
 
 def dfs(graph, start, goal=None):
     """
-    Depth First Search.
+def dfs(graph, node, visited=None):
 
-    Parameters
-    ----------
-    graph : dict or graph object
-        Graph representation.
+    if visited is None:
+        visited = set()
 
-    start : node
-        Starting node.
+    if node not in visited:
 
-    goal : node, optional
-        If provided, traversal stops after finding the goal.
+        print(node, end=" ")
+        visited.add(node)
 
-    Returns
-    -------
-    list
-        DFS traversal order.
+        for x in graph[node]:
+            dfs(graph, x, visited)
 
-    Examples
-    --------
-        graph = {
-            "A": ["B", "C"],
-            "B": ["D", "E"],
-            "C": ["F"],
-            "D": [],
-            "E": [],
-            "F": []
-        }
 
-        dfs(graph, "A")
+graph = {
+    "A": ["B", "C"],
+    "B": ["D", "E"],
+    "C": ["F"],
+    "D": [],
+    "E": [],
+    "F": []
+}
 
-    Output:
-        ['A', 'B', 'D', 'E', 'C', 'F']
-
-    Notes
-    -----
-    DFS uses a stack / recursion.
+dfs(graph, "A")
     """
 
     visited = set()
@@ -665,43 +653,38 @@ def dfs(graph, start, goal=None):
 
 def bfs(graph, start, goal=None):
     """
-    Breadth First Search.
+   from collections import deque
 
-    Parameters
-    ----------
-    graph : dict or graph object
-        Graph representation.
+def bfs(graph, start):
 
-    start : node
-        Starting node.
+    visited = set()
+    queue = deque([start])
 
-    goal : node, optional
-        If provided, traversal stops after finding the goal.
+    while queue:
 
-    Returns
-    -------
-    list
-        BFS traversal order.
+        node = queue.popleft()
 
-    Examples
-    --------
-        graph = {
-            "A": ["B", "C"],
-            "B": ["D", "E"],
-            "C": ["F"],
-            "D": [],
-            "E": [],
-            "F": []
-        }
+        if node in visited:
+            continue
 
-        bfs(graph, "A")
+        print(node, end=" ")
+        visited.add(node)
 
-    Output:
-        ['A', 'B', 'C', 'D', 'E', 'F']
+        for x in graph[node]:
+            if x not in visited:
+                queue.append(x)
 
-    Notes
-    -----
-    BFS uses a queue.
+
+graph = {
+    "A": ["B", "C"],
+    "B": ["D", "E"],
+    "C": ["F"],
+    "D": [],
+    "E": [],
+    "F": []
+}
+
+bfs(graph, "A")
     """
 
     visited = {start}
@@ -732,69 +715,56 @@ def bfs(graph, start, goal=None):
 
 def astar(graph, start, goal, heuristic=None):
     """
-    A* Search.
+   import heapq
 
-    Parameters
-    ----------
-    graph : dict or NetworkX graph
-        Weighted graph.
+def astar(graph, start, goal, h):
 
-    start : node
-        Starting node.
+    queue = [(h[start], 0, start, [start])]
+    best = {start: 0}
 
-    goal : node
-        Goal node.
+    while queue:
 
-    heuristic : dict or function, optional
-        Heuristic values or a function.
+        f, g, node, path = heapq.heappop(queue)
 
-        Dictionary:
-            h = {
-                "A": 6,
-                "B": 4,
-                "C": 3,
-                "G": 0
-            }
+        if node == goal:
+            return path, g
 
-        Function:
-            lambda node, goal: ...
+        for next, cost in graph[node]:
 
-        If omitted, h(n) = 0.
+            new_g = g + cost
 
-    Returns
-    -------
-    (path, cost) : tuple
-        Shortest path and total cost.
+            if new_g < best.get(next, float("inf")):
 
-    Examples
-    --------
-        graph = {
-            "A": [("B", 1), ("C", 3)],
-            "B": [("D", 2), ("E", 4)],
-            "C": [("E", 1)],
-            "D": [("G", 3)],
-            "E": [("G", 2)],
-            "G": []
-        }
+                best[next] = new_g
+                new_f = new_g + h[next]
 
-        h = {
-            "A": 6,
-            "B": 4,
-            "C": 3,
-            "D": 3,
-            "E": 2,
-            "G": 0
-        }
+                heapq.heappush(
+                    queue,
+                    (new_f, new_g, next, path + [next])
+                )
 
-        astar(graph, "A", "G", h)
+    return None
 
-    Formula
-    -------
-        f(n) = g(n) + h(n)
 
-    g(n) = actual cost from start
-    h(n) = estimated cost to goal
-    f(n) = total estimated cost
+graph = {
+    "A": [("B", 1), ("C", 3)],
+    "B": [("D", 2), ("E", 4)],
+    "C": [("E", 1)],
+    "D": [("G", 3)],
+    "E": [("G", 2)],
+    "G": []
+}
+
+h = {
+    "A": 6,
+    "B": 4,
+    "C": 3,
+    "D": 3,
+    "E": 2,
+    "G": 0
+}
+
+print(astar(graph, "A", "G", h))
     """
 
     if heuristic is None:
@@ -863,79 +833,44 @@ def astar(graph, start, goal, heuristic=None):
 
 def ao_star(graph, heuristic, start):
     """
-    AO* Search for an AND-OR graph.
+   def ao_star(graph, h, node):
 
-    Parameters
-    ----------
-    graph : dict
-        AND-OR graph.
+    if not graph[node]:
+        return h[node]
 
-        Each node contains a list of OR alternatives.
+    best = float("inf")
 
-        Each alternative is a list of AND children.
+    for option in graph[node]:
 
-        Example:
+        cost = 0
 
-            {
-                "A": [
-                    [("B", 2), ("C", 1)],
-                    [("D", 4)]
-                ],
-                "B": [],
-                "C": [],
-                "D": []
-            }
+        for child, edge in option:
+            cost += edge + ao_star(graph, h, child)
 
-        This means:
+        best = min(best, cost)
 
-            A -> (B AND C) OR D
+    h[node] = best
+    return best
 
-    heuristic : dict
-        Heuristic/terminal costs.
 
-    start : node
-        Starting node.
+graph = {
+    "A": [
+        [("B", 2), ("C", 1)],   # B AND C
+        [("D", 4)]              # OR D
+    ],
+    "B": [],
+    "C": [],
+    "D": []
+}
 
-    Returns
-    -------
-    (cost, solution) : tuple
+h = {
+    "A": 5,
+    "B": 2,
+    "C": 1,
+    "D": 3
+}
 
-        cost:
-            Minimum solution cost.
-
-        solution:
-            Dictionary showing which option was selected.
-
-    Example
-    -------
-        graph = {
-            "A": [
-                [("B", 2), ("C", 1)],
-                [("D", 4)]
-            ],
-            "B": [],
-            "C": [],
-            "D": []
-        }
-
-        h = {
-            "A": 5,
-            "B": 2,
-            "C": 1,
-            "D": 3
-        }
-
-        cost, solution = ao_star(graph, h, "A")
-
-    Rules
-    -----
-        AND = ADD costs
-        OR  = choose MINIMUM
-
-    Notes
-    -----
-    This implementation is designed for explicit acyclic
-    AND-OR graphs.
+print("Cost:", ao_star(graph, h, "A"))
     """
 
     memo = {}
@@ -1006,70 +941,59 @@ def ao_star(graph, heuristic, start):
 
 def minimax(tree, node, maximizing=True, return_move=False):
     """
-    Minimax with Alpha-Beta Pruning.
+ def minimax(tree, node, maximizing, alpha=float("-inf"), beta=float("inf")):
 
-    Parameters
-    ----------
-    tree : dict
-        Game tree.
+    if isinstance(tree[node], (int, float)):
+        return tree[node]
 
-        Internal node:
-            node -> [child1, child2, ...]
+    if maximizing:
 
-        Leaf node:
-            node -> numeric value
+        best = float("-inf")
 
-    node : node
-        Root node.
+        for child in tree[node]:
 
-    maximizing : bool
-        True if root is a MAX node.
-        False if root is a MIN node.
+            best = max(
+                best,
+                minimax(tree, child, False, alpha, beta)
+            )
 
-    return_move : bool
-        If False:
-            returns best value.
+            alpha = max(alpha, best)
 
-        If True:
-            returns (best_value, best_child)
+            if alpha >= beta:
+                break
 
-    Examples
-    --------
-        tree = {
-            "A": ["B", "C"],
-            "B": ["D", "E"],
-            "C": ["F", "G"],
-            "D": 3,
-            "E": 5,
-            "F": 2,
-            "G": 9
-        }
+        return best
 
-        minimax(tree, "A", True)
+    else:
 
-        minimax(tree, "A", True, return_move=True)
+        best = float("inf")
 
-    Rules
-    -----
-        MAX -> choose maximum
-        MIN -> choose minimum
+        for child in tree[node]:
 
-    Alpha-Beta
-    ----------
-        alpha = best value found by MAX
-        beta  = best value found by MIN
+            best = min(
+                best,
+                minimax(tree, child, True, alpha, beta)
+            )
 
-        When alpha >= beta,
-        remaining branches can be pruned.
+            beta = min(beta, best)
 
-    Returns
-    -------
-    int/float
-        Best minimax value.
+            if alpha >= beta:
+                break
 
-    or:
+        return best
 
-        (value, move)
+
+tree = {
+    "A": ["B", "C"],
+    "B": ["D", "E"],
+    "C": ["F", "G"],
+    "D": 3,
+    "E": 5,
+    "F": 2,
+    "G": 9
+}
+
+print("Best value:", minimax(tree, "A", True))
     """
 
     def search(current, max_turn, alpha, beta):
@@ -1172,50 +1096,46 @@ minimax_alpha_beta = minimax
 
 def water_jug(capacity1, capacity2, target):
     """
-    Solve the Water Jug Problem using BFS.
+ from collections import deque
+from math import gcd
 
-    Parameters
-    ----------
-    capacity1 : int
-        Capacity of jug 1.
+def water_jug(a, b, target):
 
-    capacity2 : int
-        Capacity of jug 2.
+    queue = deque([(0, 0)])
+    visited = set()
 
-    target : int
-        Required amount in either jug.
+    while queue:
 
-    Returns
-    -------
-    list
-        Sequence of:
-            (action, (jug1_amount, jug2_amount))
+        x, y = queue.popleft()
 
-    Examples
-    --------
-    Classic problem:
+        if (x, y) in visited:
+            continue
 
-        water_jug(4, 3, 2)
+        visited.add((x, y))
 
-    Other problems:
+        print((x, y))
 
-        water_jug(5, 3, 4)
+        if x == target or y == target:
+            print("Goal reached!")
+            return
 
-        water_jug(8, 5, 6)
+        states = [
+            (a, y),                              # Fill A
+            (x, b),                              # Fill B
+            (0, y),                              # Empty A
+            (x, 0),                              # Empty B
+            (x - min(x, b-y), y + min(x, b-y)),  # A -> B
+            (x + min(y, a-x), y - min(y, a-x))   # B -> A
+        ]
 
-    Possible operations
-    -------------------
-        Fill Jug 1
-        Fill Jug 2
-        Empty Jug 1
-        Empty Jug 2
-        Pour Jug 1 -> Jug 2
-        Pour Jug 2 -> Jug 1
+        for state in states:
+            if state not in visited:
+                queue.append(state)
 
-    Notes
-    -----
-    BFS guarantees the shortest sequence of states when every
-    operation has equal cost.
+    print("No solution")
+
+
+water_jug(4, 3, 2)
     """
 
     if capacity1 <= 0 or capacity2 <= 0:
@@ -1377,56 +1297,53 @@ def print_board(solution):
 
 def queens(n=8, all_solutions=False, show=True):
     """
-    Solve the N-Queens Problem using backtracking.
+def queens(n):
 
-    Parameters
-    ----------
-    n : int
-        Number of queens and board size.
+    board = [-1] * n
 
-    all_solutions : bool
-        False -> return one solution.
-        True  -> return all solutions.
+    def safe(row, col):
 
-    show : bool
-        If True, print the first solution.
+        for r in range(row):
 
-    Examples
-    --------
-    8 Queens:
+            if board[r] == col:
+                return False
 
-        queens(8)
+            if abs(board[r] - col) == abs(r - row):
+                return False
 
-    4 Queens:
+        return True
 
-        queens(4)
 
-    10 Queens:
+    def solve(row):
 
-        queens(10)
+        if row == n:
+            return True
 
-    All 8-Queens solutions:
+        for col in range(n):
 
-        solutions = queens(8, all_solutions=True)
+            if safe(row, col):
 
-    Returns
-    -------
-    list
-        One solution as a list of column positions.
+                board[row] = col
 
-    or, when all_solutions=True:
+                if solve(row + 1):
+                    return True
 
-        list of all solutions.
+                board[row] = -1
 
-    Rules
-    -----
-        No two queens can share a column.
+        return False
 
-        No two queens can share a diagonal.
 
-    Algorithm
-    ---------
-        Backtracking.
+    solve(0)
+
+    for row in range(n):
+
+        for col in range(n):
+            print("Q" if board[row] == col else ".", end=" ")
+
+        print()
+
+
+queens(8)
     """
 
     if n <= 0:
