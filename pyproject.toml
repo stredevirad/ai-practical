@@ -10,4 +10,8 @@ dependencies = [
     "networkx",
     "python-constraint",
     "simpleai"
+<<<<<<< HEAD
 ]
+=======
+]
+>>>>>>> 0045026 (Fix package structure)
