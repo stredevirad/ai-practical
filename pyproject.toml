@@ -6,12 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "ai-practical"
 version = "1.0.0"
 description = "AI practical helper library"
+
 dependencies = [
     "networkx",
     "python-constraint",
     "simpleai"
-<<<<<<< HEAD
 ]
-=======
-]
->>>>>>> 0045026 (Fix package structure)
