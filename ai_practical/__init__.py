@@ -294,37 +294,25 @@ def help(item=None):
 
 def chatbot(responses=None, exit_words=None):
     """
-    Simple rule-based chatbot.
+   def chatbot():
+    print("Chatbot: Hello! Type 'bye' to exit.")
 
-    Parameters
-    ----------
-    responses : dict, optional
-        Dictionary where keys are keywords and values are
-        responses. A value may be a string or a list of strings.
+    while True:
+        x = input("You: ").lower()
 
-    exit_words : iterable, optional
-        Words that stop the chatbot.
+        if x == "bye":
+            print("Chatbot: Goodbye!")
+            break
+        elif "hello" in x or "hi" in x:
+            print("Chatbot: Hello!")
+        elif "name" in x:
+            print("Chatbot: I am a Python chatbot.")
+        elif "how are you" in x:
+            print("Chatbot: I am fine!")
+        else:
+            print("Chatbot: I don't understand.")
 
-    Examples
-    --------
-    Basic chatbot:
-
-        chatbot()
-
-    Custom chatbot:
-
-        responses = {
-            "hello": "Hi!",
-            "name": "I am your AI bot.",
-            "bye": "Goodbye!"
-        }
-
-        chatbot(responses)
-
-    Notes
-    -----
-    This is a simple keyword-based chatbot, not a machine-learning
-    chatbot.
+chatbot()
     """
 
     if responses is None:
